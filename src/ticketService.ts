@@ -1,9 +1,22 @@
 import { findCommentsByTicketId, saveComment } from "./commentRepository";
+import { generateId } from "./ids";
 import { findAllTickets, findTicketById, saveTicket, updateTicket, updateTicketWithComment } from "./ticketRepository";
 import { getPublicUser } from "./userService";
-import type { Ticket, TicketComment, TicketPriority, TicketStatus } from "./types";
+import type { PublicUser, Ticket, TicketComment, TicketPriority, TicketStatus } from "./types";
 
 const DESCRIPTION_LENGTH_HIGH_PRIORITY = 220;
+
+interface TicketParticipants {
+  requester: PublicUser | undefined;
+  assigned: PublicUser | undefined;
+}
+
+function resolveParticipants(ticket: Ticket): TicketParticipants {
+  return {
+    requester: getPublicUser(ticket.requesterId),
+    assigned: ticket.assignedToId ? getPublicUser(ticket.assignedToId) : undefined,
+  };
+}
 
 export interface TicketFilters {
   status?: string;
@@ -28,10 +41,6 @@ export interface UpdateStatusInput {
 export interface AddCommentInput {
   authorId: string;
   message: string;
-}
-
-function generateId(prefix: string) {
-  return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 }
 
 export function calculatePriority(category: string, description: string): TicketPriority {
@@ -72,8 +81,7 @@ export function listTickets(filters: TicketFilters = {}) {
   }
 
   return tickets.map((ticket) => {
-    const requester = getPublicUser(ticket.requesterId);
-    const assigned = ticket.assignedToId ? getPublicUser(ticket.assignedToId) : undefined;
+    const { requester, assigned } = resolveParticipants(ticket);
     const comments = findCommentsByTicketId(ticket.id);
 
     return {
@@ -113,8 +121,7 @@ export function getTicketDetails(id: string) {
     return undefined;
   }
 
-  const requester = getPublicUser(ticket.requesterId);
-  const assigned = ticket.assignedToId ? getPublicUser(ticket.assignedToId) : undefined;
+  const { requester, assigned } = resolveParticipants(ticket);
   const comments = findCommentsByTicketId(ticket.id).map((comment) => ({
     ...comment,
     author: getPublicUser(comment.authorId),
@@ -149,10 +156,11 @@ export function updateTicketStatus(id: string, input: UpdateStatusInput): Ticket
     return undefined;
   }
 
+  const now = new Date().toISOString();
   const updatedTicket: Ticket = {
     ...ticket,
     status: input.status,
-    updatedAt: new Date().toISOString(),
+    updatedAt: now,
   };
 
   let comment: TicketComment | undefined;
@@ -163,7 +171,7 @@ export function updateTicketStatus(id: string, input: UpdateStatusInput): Ticket
       ticketId: ticket.id,
       authorId: input.authorId || ticket.requesterId,
       message: input.comment,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
     };
   }
 
@@ -178,18 +186,19 @@ export function addTicketComment(id: string, input: AddCommentInput): TicketComm
     return undefined;
   }
 
+  const now = new Date().toISOString();
   const comment: TicketComment = {
     id: generateId("comment"),
     ticketId: ticket.id,
     authorId: input.authorId,
     message: input.message,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
   };
 
   saveComment(comment);
   updateTicket({
     ...ticket,
-    updatedAt: new Date().toISOString(),
+    updatedAt: now,
   });
 
   return comment;

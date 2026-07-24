@@ -4,6 +4,8 @@ import helmet from "helmet";
 import "dotenv/config";
 import { errorHandler } from "./errorHandler";
 import { AppError } from "./errors";
+import { logger } from "./logger";
+import { requestLogger } from "./requestLogger";
 import router from "./routes";
 
 const app = express();
@@ -12,6 +14,7 @@ const port = Number(process.env.PORT || 3000);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 app.use("/api", router);
 
 app.use((_request, _response, next) => {
@@ -21,5 +24,5 @@ app.use((_request, _response, next) => {
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Oxetech Helpdesk API running on http://localhost:${port}`);
+  logger.info(`Oxetech Helpdesk API running on http://localhost:${port}`);
 });
