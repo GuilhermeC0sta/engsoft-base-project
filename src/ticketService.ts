@@ -1,6 +1,6 @@
 import { findCommentsByTicketId, saveComment } from "./commentRepository";
 import { findAllTickets, findTicketById, saveTicket, updateTicket, updateTicketWithComment } from "./ticketRepository";
-import { findUserById } from "./userRepository";
+import { getPublicUser } from "./userService";
 import type { Ticket, TicketComment, TicketPriority, TicketStatus } from "./types";
 
 const DESCRIPTION_LENGTH_HIGH_PRIORITY = 220;
@@ -72,8 +72,8 @@ export function listTickets(filters: TicketFilters = {}) {
   }
 
   return tickets.map((ticket) => {
-    const requester = findUserById(ticket.requesterId);
-    const assigned = ticket.assignedToId ? findUserById(ticket.assignedToId) : undefined;
+    const requester = getPublicUser(ticket.requesterId);
+    const assigned = ticket.assignedToId ? getPublicUser(ticket.assignedToId) : undefined;
     const comments = findCommentsByTicketId(ticket.id);
 
     return {
@@ -113,11 +113,11 @@ export function getTicketDetails(id: string) {
     return undefined;
   }
 
-  const requester = findUserById(ticket.requesterId);
-  const assigned = ticket.assignedToId ? findUserById(ticket.assignedToId) : undefined;
+  const requester = getPublicUser(ticket.requesterId);
+  const assigned = ticket.assignedToId ? getPublicUser(ticket.assignedToId) : undefined;
   const comments = findCommentsByTicketId(ticket.id).map((comment) => ({
     ...comment,
-    author: findUserById(comment.authorId),
+    author: getPublicUser(comment.authorId),
   }));
 
   return { ...ticket, requester, assigned, comments };

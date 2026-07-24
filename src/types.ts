@@ -18,6 +18,8 @@ export interface User {
   password: string;
 }
 
+export type PublicUser = Omit<User, "password">;
+
 export interface TicketComment {
   id: string;
   ticketId: string;

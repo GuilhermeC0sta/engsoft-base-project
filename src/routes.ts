@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AppError } from "./errors";
-import { findAllUsers } from "./userRepository";
+import { listPublicUsers } from "./userService";
 import {
   addTicketComment,
   createTicket,
@@ -22,7 +22,7 @@ router.get("/health", (_request, response) => {
 });
 
 router.get("/users", (_request, response) => {
-  response.json(findAllUsers());
+  response.json(listPublicUsers());
 });
 
 router.get("/tickets", (request, response) => {
