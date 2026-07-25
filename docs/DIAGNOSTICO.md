@@ -51,3 +51,23 @@ Sem reescrever o projeto, o foco desta entrega é:
 4. Adicionar testes úteis para comportamentos importantes.
 5. Atualizar o README com execução e testes.
 6. Aplicar um pattern básico quando fizer sentido no contexto atual.
+
+## Estado após o Projeto Final
+
+Os problemas listados acima foram endereçados de forma incremental:
+
+- **Responsabilidades**: HTTP (`routes.ts`), regra de negócio (`ticketService.ts`, `userService.ts`) e persistência (`database.ts`, `*Repository.ts`) estão separados.
+- **Validação**: entrada validada em todos os endpoints de escrita (`validation.ts`).
+- **Erros**: padronizados com `AppError` e `errorHandler`.
+- **Testes**: unitários (prioridade, validação) e de integração (`ticketService`) — 28 testes.
+- **Segurança**: senha nunca é exposta (`PublicUser`) e `helmet` habilitado.
+- **Observabilidade simples**: logs centralizados (`logger`) e de requisições (`requestLogger`).
+- **Ambiente e automação**: Docker multi-stage, ESLint e CI (GitHub Actions).
+
+Decisões técnicas: [DECISOES.md](DECISOES.md).
+
+## Limitações que permanecem
+
+- Persistência em arquivo JSON (sem banco real, sem concorrência).
+- Sem autenticação/autorização real; senhas ainda ficam no arquivo de dados.
+- Cobertura de testes focada nas partes importantes, não total.
