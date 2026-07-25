@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "seed": "tsx src/seed.ts",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "tsx --test"
   },
   "dependencies": {
     "cors": "^2.8.6",
